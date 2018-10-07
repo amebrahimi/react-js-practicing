@@ -4,13 +4,26 @@ import TextInputGroup from "../layout/TextInputGroup";
 import axios from 'axios';
 
 
-class AddContact extends Component {
+class EditContact extends Component {
     state = {
         name: '',
         email: '',
         phone: '',
         errors: {}
     };
+
+    async componentDidMount() {
+        const {id} = this.props.match.params;
+        const res = await axios.get(`https://jsonplaceholder.typicode.com/users/${id}`);
+        const {name, email, phone} = res.data;
+
+
+        this.setState({
+            name,
+            email,
+            phone
+        })
+    }
 
     onInputChange = e => this.setState({[e.target.name]: e.target.value});
     onSubmit = async (dispatch, e) => {
@@ -44,14 +57,18 @@ class AddContact extends Component {
             return;
         }
 
-        const newContact = {
+        const updContact = {
             name,
             email,
             phone,
         };
 
-        const res = await axios.post('https://jsonplaceholder.typicode.com/users', newContact);
-        dispatch({type: 'ADD_CONTACT', payload: res.data});
+        const {id} = this.props.match.params;
+
+        const res = await axios.put(`https://jsonplaceholder.typicode.com/users/${id}`, updContact);
+
+        dispatch({type: 'UPDATE_CONTACT', payload: res.data});
+
 
         // Clear State
         this.setState({
@@ -75,7 +92,7 @@ class AddContact extends Component {
                         <div>
                             <div className="card mb-3">
                                 <div className="card-header">
-                                    Add Contact
+                                    Edit Contact
                                 </div>
                                 <div className="card-body">
                                     <form onSubmit={this.onSubmit.bind(this, dispatch)}>
@@ -91,7 +108,7 @@ class AddContact extends Component {
                                                         value={phone} onChange={this.onInputChange}
                                                         error={errors.phone}
                                         />
-                                        <input type="submit" value="Add Contact" className="btn btn-light btn-block"
+                                        <input type="submit" value="Update Contact" className="btn btn-light btn-block"
                                         />
                                     </form>
                                 </div>
@@ -105,4 +122,4 @@ class AddContact extends Component {
     }
 }
 
-export default AddContact;
+export default EditContact;
